@@ -1,0 +1,273 @@
+:host {
+  display: block;
+}
+
+/* The page is a stack of tracks, not one column: the masthead runs on the
+   display track, the body narrows to the document track, and both hang off the
+   same left rail as the home page. See CONTEXT.md. */
+.doc {
+  padding-block: clamp(1.75rem, 4vw, 2.75rem) 2rem;
+}
+
+.back {
+  display: block;
+  font-size: var(--step--2);
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  text-decoration: none;
+  margin-bottom: clamp(2rem, 5vw, 3.25rem);
+}
+
+.back:hover {
+  color: var(--accent);
+}
+
+.back::before {
+  content: '← ';
+}
+
+/* --- masthead ------------------------------------------------------------- */
+
+/* No bottom rule: the facts sheet below draws its own hairlines, and a second
+   divider directly above them reads as a double rule. */
+.masthead__title {
+  font-size: var(--step-4);
+  line-height: 1.04;
+  letter-spacing: -0.02em;
+  margin-top: 0.8rem;
+  max-width: 19ch;
+}
+
+.masthead__dek {
+  margin-top: 1.2rem;
+  font-family: var(--font-text);
+  font-style: italic;
+  font-size: var(--step-2);
+  line-height: 1.4;
+  color: var(--ink-muted);
+  max-width: 38ch;
+}
+
+/* The facts sheet: a filing's cover data. Each cell carries its own hairline so
+   the group reads as a record rather than a caption. */
+.facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
+  gap: 1.4rem 2.5rem;
+  margin: clamp(2.25rem, 5vw, 3rem) 0 0;
+  padding: 0;
+}
+
+.facts__row {
+  padding-top: 0.7rem;
+  border-top: 1px solid var(--rule-strong);
+}
+
+.facts__label {
+  display: block;
+  font-size: var(--step--2);
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  margin-bottom: 0.35rem;
+}
+
+.facts__value {
+  display: block;
+  margin: 0;
+  font-size: var(--step--1);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.45;
+}
+
+/* --- body ----------------------------------------------------------------- */
+
+.body {
+  padding-top: clamp(2.75rem, 6vw, 4rem);
+}
+
+.body h2 {
+  font-size: var(--step-2);
+  margin-top: 3.25rem;
+  margin-bottom: 0.9rem;
+  max-width: 26ch;
+}
+
+.body mn-block:first-child h2 {
+  margin-top: 0;
+}
+
+.body h3 {
+  font-size: var(--step-1);
+  margin-top: 2rem;
+  margin-bottom: 0.6rem;
+}
+
+.body p,
+.body li {
+  font-family: var(--font-text);
+  font-size: var(--step-1);
+  line-height: 1.65;
+}
+
+.body p + p {
+  margin-top: 1.05em;
+}
+
+/* Prose resuming after a block needs the same air as prose after prose.
+   `p + p` alone leaves paragraphs butted against lists, diagrams and callouts. */
+.body ul + p,
+.body ol + p,
+.body .limit + p {
+  margin-top: 1.3em;
+}
+
+.body ul,
+.body ol {
+  margin: 1.05em 0 0;
+  padding-left: 1.2rem;
+}
+
+.body li + li {
+  margin-top: 0.5em;
+}
+
+.body li::marker {
+  color: var(--ink-muted);
+}
+
+.body strong {
+  font-weight: 600;
+}
+
+.body a {
+  color: var(--accent);
+}
+
+/* Projected margin notes are styled by this component, so the prose rules above
+   reach them. Put them back to the small sans the reference column expects. */
+.body [ref] p,
+.body [ref] li {
+  font-family: var(--font-ui);
+  font-size: var(--step--1);
+  line-height: 1.5;
+}
+
+.body [ref] p + p {
+  margin-top: 0.55em;
+}
+
+.ref__figure {
+  font-weight: 600;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+/* A step in a sequence that genuinely is a sequence — the four payment layers. */
+.steps {
+  list-style: none;
+  margin: 1.5em 0 0;
+  padding: 0;
+  counter-reset: step;
+}
+
+.body .steps li {
+  position: relative;
+  padding-left: 2.9rem;
+  counter-increment: step;
+}
+
+.body .steps li + li {
+  margin-top: 1.15em;
+}
+
+.body .steps li::before {
+  content: counter(step, decimal-leading-zero);
+  position: absolute;
+  left: 0;
+  top: 0.3em;
+  font-family: var(--font-ui);
+  font-size: var(--step--2);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Pulled from the prose because it is the point of the page, not an aside.
+   Scoped under .body: bare .pull loses to `.body p` on specificity, which is
+   why these quotes used to render at body size. */
+.body .pull {
+  margin: 2.75rem 0;
+  padding-left: 1.6rem;
+  border-left: 3px solid var(--accent);
+  font-family: var(--font-text);
+  font-size: var(--step-3);
+  line-height: 1.24;
+  letter-spacing: -0.018em;
+  text-wrap: balance;
+}
+
+/* A stated limitation. The accent edge marks it as something the author is
+   flagging, not something the reader has to find. */
+.limit {
+  margin-top: 1.6em;
+  padding: 1.2rem 1.35rem;
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--rule-strong);
+  border-radius: var(--radius);
+  background: var(--paper-raised);
+}
+
+.limit__label {
+  display: block;
+  font-family: var(--font-ui);
+  font-size: var(--step--2);
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  margin-bottom: 0.5rem;
+}
+
+/* --- next ----------------------------------------------------------------- */
+
+.next {
+  margin-top: 4.5rem;
+  padding-top: 1.4rem;
+  border-top: 1px solid var(--rule);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 2rem;
+  align-items: baseline;
+}
+
+.next__label {
+  font-family: var(--font-ui);
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  font-size: var(--step--2);
+  color: var(--ink-muted);
+}
+
+.body .next a {
+  font-family: var(--font-text);
+  font-size: var(--step-2);
+  color: var(--ink);
+  text-decoration: none;
+  letter-spacing: -0.012em;
+}
+
+.body .next a:hover {
+  color: var(--accent);
+}
+
+@media (max-width: 60rem) {
+  .masthead__title {
+    max-width: none;
+  }
+}

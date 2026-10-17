@@ -1,0 +1,476 @@
+:host {
+  display: block;
+}
+
+/* --- masthead ------------------------------------------------------------- */
+
+/* No bottom rule: the evidence band below supplies the edge. */
+.masthead {
+  padding-block: clamp(3.5rem, 9vw, 7rem) clamp(2.75rem, 6vw, 4.5rem);
+}
+
+/* The largest object on the site. Everything below is set against it. */
+.masthead__claim {
+  margin-top: 1.1rem;
+  font-size: var(--step-5);
+  line-height: 1.03;
+  letter-spacing: -0.024em;
+  max-width: 17ch;
+}
+
+.masthead__byline {
+  margin-top: 1.7rem;
+  font-size: var(--step-0);
+  color: var(--ink-muted);
+}
+
+.masthead__who {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+/* The reading column resumes here, back at document width. */
+.masthead__body {
+  margin-top: clamp(2.75rem, 6vw, 4.5rem);
+}
+
+/* The one figure the whole page rests on. Marked as verifiable, not decorated. */
+.figure {
+  color: var(--accent);
+  text-decoration: none;
+  background-image: linear-gradient(var(--accent), var(--accent));
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 100% 1px;
+  padding-bottom: 0.05em;
+}
+
+.figure::after {
+  content: '↗';
+  font-family: var(--font-ui);
+  font-size: 0.62em;
+  vertical-align: 0.5em;
+  margin-left: 0.15em;
+}
+
+.figure:hover {
+  background-size: 100% 2px;
+}
+
+/* A 1px rule under 4.5rem type reads as a hairline accident. Scale it. */
+.masthead__claim .figure {
+  background-size: 100% 0.05em;
+}
+
+.masthead__claim .figure:hover {
+  background-size: 100% 0.085em;
+}
+
+.masthead__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 2.25rem;
+}
+
+.action {
+  display: inline-block;
+  padding: 0.55rem 1.05rem;
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius);
+  font-size: var(--step--1);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  transition: border-color 120ms ease, background-color 120ms ease, color 120ms ease;
+}
+
+.action:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.action--lead {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--paper);
+}
+
+.action--lead:hover {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+  color: var(--paper);
+}
+
+.ref__figure {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+/* --- evidence band -------------------------------------------------------- */
+
+/* The only inverted ground on the site, so inversion keeps meaning "this is the
+   proof". Nothing on the paper palette survives here — the band carries its own
+   ink scale. */
+.evidence {
+  background: var(--band);
+  color: var(--band-ink);
+  padding-block: clamp(2.75rem, 6vw, 4.5rem);
+}
+
+.evidence__label {
+  color: var(--band-ink-muted);
+}
+
+.evidence__rule {
+  margin-top: 1.1rem;
+  border-top: 1px solid var(--band-rule);
+  transform-origin: left center;
+}
+
+.evidence__figures {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.75rem 4.5rem;
+  margin: 2rem 0 0;
+}
+
+.evidence__caption {
+  font-size: var(--step--2);
+  font-weight: 600;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: var(--band-ink-muted);
+}
+
+/* Sans and tabular: a figure is data, not prose. One step below the claim, so
+   the claim stays the largest thing on the page. */
+.evidence__value {
+  margin: 0.4rem 0 0;
+  font-family: var(--font-ui);
+  font-size: var(--step-4);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: var(--band-ink);
+}
+
+.evidence__note {
+  margin-top: 2.1rem;
+  max-width: 48ch;
+  font-size: var(--step--1);
+  line-height: 1.55;
+  color: var(--band-ink-muted);
+}
+
+.evidence__source {
+  color: var(--band-accent);
+  white-space: nowrap;
+}
+
+.evidence a:hover {
+  color: var(--band-ink);
+  text-decoration-color: currentColor;
+}
+
+/* The paper accent is near-invisible against the band. */
+.evidence :focus-visible {
+  outline-color: var(--band-accent);
+}
+
+/* The page's one moment: the rule draws across and the figures settle as the
+   band enters. Declared only inside @supports, and every element's resting
+   state IS its final state — so no support, or reduced motion, renders the
+   finished band with nothing to catch up on. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .evidence__rule {
+      animation: evidence-rule linear both;
+      animation-timeline: view();
+      animation-range: entry 15% entry 65%;
+    }
+
+    .evidence__cell {
+      animation: evidence-settle linear both;
+      animation-timeline: view();
+      animation-range: entry 28% entry 82%;
+    }
+
+    .evidence__cell:nth-child(2) {
+      animation-range: entry 36% entry 90%;
+    }
+  }
+}
+
+@keyframes evidence-rule {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+@keyframes evidence-settle {
+  from {
+    opacity: 0;
+    transform: translateY(0.35em);
+  }
+}
+
+/* --- sections ------------------------------------------------------------- */
+
+/* Progressive quieting: each section is set smaller and tighter than the one
+   above it, because each matters less than the one above it. The page descends
+   from claim to footnote. See CONTEXT.md. */
+.section {
+  padding-block: clamp(3rem, 6vw, 4.5rem);
+  border-bottom: 1px solid var(--rule);
+}
+
+.section--loud {
+  padding-block: clamp(3.5rem, 8vw, 6rem);
+}
+
+.section--quiet {
+  padding-block: clamp(2.75rem, 5vw, 4rem);
+}
+
+.section--footnote {
+  padding-block: clamp(2.5rem, 4vw, 3.25rem);
+}
+
+/* The footer already draws its own top rule — a second one leaves an empty band. */
+.section--last {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.section__heading {
+  font-size: var(--step-2);
+  margin-top: 0.6rem;
+  margin-bottom: 2.25rem;
+  max-width: 24ch;
+}
+
+/* The loud section is loud because its entries are, not because its signpost
+   is. The heading yields so the ledger titles carry the weight. */
+.section__heading--loud {
+  margin-bottom: 3rem;
+  max-width: 22ch;
+}
+
+.section__heading--quiet {
+  font-size: var(--step-1);
+  color: var(--ink-muted);
+  margin-bottom: 1.75rem;
+}
+
+/* --- ledger --------------------------------------------------------------- */
+
+.ledger {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  counter-reset: entry;
+}
+
+.ledger__row {
+  border-top: 1px solid var(--rule);
+  counter-increment: entry;
+}
+
+.ledger__row:last-child {
+  border-bottom: 1px solid var(--rule);
+}
+
+/* Index, body, reference — a ruled row in a book of accounts. The index column
+   is fixed so the titles align regardless of how many entries there are. */
+.ledger__link {
+  display: grid;
+  grid-template-columns: 3.25rem minmax(0, var(--measure)) minmax(var(--margin-col), 1fr);
+  column-gap: 2.5rem;
+  align-items: start;
+  padding-block: 1.9rem;
+  padding-inline: 0.9rem;
+  margin-inline: -0.9rem;
+  text-decoration: none;
+  transition: background-color 120ms ease;
+}
+
+.ledger__link:hover {
+  background: var(--accent-wash);
+  color: inherit;
+}
+
+/* Numbered by CSS so the markup carries no counting logic, and screen readers
+   hear the title rather than a decorative number. */
+.ledger__index {
+  display: block;
+  padding-top: 0.55rem;
+  font-size: var(--step--1);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--ink-muted);
+}
+
+.ledger__index::before {
+  content: counter(entry, decimal-leading-zero);
+}
+
+.ledger__link:hover .ledger__index {
+  color: var(--accent);
+}
+
+.ledger__body {
+  display: block;
+}
+
+/* A heading, not a styled span: at this size it reads as one, and the outline
+   should let a screen-reader user jump between entries the way a sighted reader
+   scans them. */
+.ledger__title {
+  font-size: var(--step-3);
+  line-height: 1.12;
+  letter-spacing: -0.015em;
+  text-wrap: initial;
+}
+
+.ledger__link:hover .ledger__title {
+  color: var(--accent);
+}
+
+.ledger__summary {
+  display: block;
+  margin-top: 0.5rem;
+  font-family: var(--font-text);
+  font-size: var(--step-1);
+  line-height: 1.5;
+  color: var(--ink-muted);
+}
+
+.ledger__stack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.9rem;
+}
+
+.chip {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  font-size: var(--step--2);
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  color: var(--ink-muted);
+  white-space: nowrap;
+}
+
+.chip--lg {
+  padding: 0.3rem 0.7rem;
+  font-size: var(--step--1);
+  color: var(--ink);
+}
+
+.ledger__meta {
+  display: block;
+  padding-top: 0.45rem;
+  font-size: var(--step--1);
+  color: var(--ink-muted);
+}
+
+.ledger__period {
+  display: block;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.ledger__reference {
+  display: block;
+  margin-top: 0.3rem;
+}
+
+/* Partie carries less weight than the county work, and should look like it. */
+.ledger__row--quiet .ledger__title {
+  font-size: var(--step-2);
+}
+
+.ledger__row--quiet .ledger__summary {
+  font-size: var(--step-0);
+}
+
+/* --- experience ----------------------------------------------------------- */
+
+.entry__employer {
+  font-size: var(--step-1);
+  font-weight: 600;
+}
+
+.entry__detail {
+  margin-top: 0.5rem;
+  font-family: var(--font-text);
+  font-size: var(--step-1);
+  line-height: 1.55;
+  color: var(--ink-muted);
+}
+
+.entry__role {
+  margin-top: 0.7rem;
+  line-height: 1.4;
+}
+
+.entry__org {
+  color: var(--ink-muted);
+}
+
+/* --- skills --------------------------------------------------------------- */
+
+.tier__items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+/* --- earlier -------------------------------------------------------------- */
+
+.earlier__heading {
+  font-size: var(--step-1);
+  font-weight: 600;
+  color: var(--ink-muted);
+}
+
+.earlier__list {
+  list-style: none;
+  margin: 1rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.6rem;
+  font-size: var(--step-0);
+}
+
+.earlier__detail {
+  display: block;
+  font-size: var(--step--1);
+  color: var(--ink-muted);
+}
+
+@media (max-width: 60rem) {
+  /* The reference column folds under the body, but the index keeps its own
+     column so the rows still read as a numbered list. */
+  .ledger__link {
+    grid-template-columns: 2.4rem minmax(0, 1fr);
+    column-gap: 1.25rem;
+    row-gap: 0.9rem;
+  }
+
+  .ledger__index {
+    padding-top: 0.35rem;
+  }
+
+  .ledger__meta {
+    grid-column: 2;
+    padding-top: 0;
+  }
+}

@@ -1,0 +1,147 @@
+<article class="doc">
+  <a routerLink="/" fragment="work" class="back track track--display">All work</a>
+
+  <header class="masthead track track--display">
+    <p class="eyebrow">Case study — Partie</p>
+    <h1 class="masthead__title">Real-time video and notifications for a gaming platform</h1>
+    <p class="masthead__dek">What I owned, and what I didn't.</p>
+
+    <dl class="facts">
+      <div class="facts__row">
+        <dt class="facts__label">Role</dt>
+        <dd class="facts__value">Full stack developer, team of six</dd>
+      </div>
+      <div class="facts__row">
+        <dt class="facts__label">When</dt>
+        <dd class="facts__value">Nov 2020 — May 2022</dd>
+      </div>
+      <div class="facts__row">
+        <dt class="facts__label">Stack</dt>
+        <dd class="facts__value">Angular · ASP.NET Core · SQL Server · Agora · OneSignal</dd>
+      </div>
+      <div class="facts__row">
+        <dt class="facts__label">Product</dt>
+        <dd class="facts__value">Since shut down</dd>
+      </div>
+    </dl>
+  </header>
+
+  <div class="body track track--doc">
+    <mn-block>
+      <h2>Context, and the boundary</h2>
+      <p>
+        Partie connected gamers around the world so they could play together. I joined as a
+        full stack developer alongside an offshore team of five or six. The architecture and
+        framework choices were made before I arrived.
+      </p>
+      <p>
+        I worked across the frontend and backend, and I owned two integrations end to end:
+        <strong>Agora for real-time video, and OneSignal for notifications.</strong> That's
+        what this page is about. The platform ran microservices on Kubernetes with Azure
+        DevOps pipelines, which I worked within — modifying pipeline definitions, debugging
+        services in-cluster — but did not own.
+      </p>
+      <p>
+        The web application was the primary surface. iOS and Android were ports through a
+        cross-platform wrapper, and the desktop build was Electron pointing at the web app.
+      </p>
+
+      <div ref>
+        <p class="ref__figure">Scope</p>
+        <p>
+          One developer's slice of a team product, written at that scale on purpose. The
+          county work is where the ownership claims are.
+        </p>
+      </div>
+    </mn-block>
+
+    <mn-block>
+      <h2>Agora — keeping people in the call</h2>
+      <p>
+        Video served three purposes: group party chat, streaming to spectators, and gamers
+        talking while playing. Sessions ran up to about 25 participants.
+      </p>
+      <p>
+        I built the server side — token generation and the access and refresh token exchange
+        against Agora.
+      </p>
+      <p>Two problems were worth the time:</p>
+      <p>
+        <strong>Knowing who's in the room.</strong> Agora has its own identity model, and it
+        doesn't know anything about ours. Linking our user ID to the Agora token is what let
+        the platform answer "which of our users is in this session" — required for anything
+        social layered on top of a call.
+      </p>
+      <p>
+        <strong>Staying in the room.</strong> Agora expires tokens and drops participants
+        when they lapse. To a user that's the call ending for no reason. So the client had
+        to exchange access tokens for refreshed ones in the background, before expiry,
+        without interrupting anything.
+      </p>
+
+      <p class="pull">Users should never learn that their session had a timer.</p>
+    </mn-block>
+
+    <mn-block>
+      <h2>OneSignal — notifying the right people</h2>
+      <p>
+        Notifications went out by SMS and email, triggered by app updates, invites, friend
+        requests, subscription payments, and group chats starting.
+      </p>
+      <p>I built the server-side audience filtering and wired up the sending.</p>
+      <p>
+        The interesting part isn't delivery, it's <strong>who</strong>. "Notify everyone" is
+        one line of code and a bad idea — an app-wide announcement nominally targets every
+        user who ever registered, most of whom left long ago, and sending to all of them
+        burns server resources to reach people who aren't there.
+      </p>
+      <p>
+        So the audience narrows by recency: users active within a window,
+        <strong>configurable rather than hard-coded</strong>, typically three to six months,
+        adjustable per business rule. Everyone who should hear about it does, without a
+        fan-out that costs more than the message is worth.
+      </p>
+
+      <div ref>
+        <p class="ref__figure">3–6 months</p>
+        <p>
+          The default recency window for an app-wide send — a business rule, not a constant
+          in the code.
+        </p>
+      </div>
+    </mn-block>
+
+    <mn-block>
+      <h2>It shipped, and it wasn't used much</h2>
+      <p>
+        The video worked. It didn't get heavy use, because gamers were already on Discord
+        and had no reason to move.
+      </p>
+      <p>
+        I'm including that because it's the honest outcome and because shipping isn't the
+        same as succeeding. The engineering was sound; the product bet was that people would
+        switch communication tools for a feature that wasn't better than what they had. They
+        didn't. That was worth learning early, and it's a useful check on any feature that
+        competes with an incumbent people already have open.
+      </p>
+      <p>Partie has since shut down. I'd rather say that here than have you find a dead link.</p>
+    </mn-block>
+
+    <mn-block>
+      <h2>What this was</h2>
+      <p>
+        Eighteen months on a consumer product at startup pace, on a distributed team,
+        integrating real-time media against third-party services I didn't control. That's a
+        different set of constraints from government work — faster, less permanent, and with
+        the product question mattering more than the correctness question.
+      </p>
+    </mn-block>
+
+    <p class="next">
+      <span class="next__label">Next</span>
+      <a routerLink="/work/orange-county-property-tax"
+        >Orange County property tax — the system of record</a
+      >
+    </p>
+  </div>
+</article>

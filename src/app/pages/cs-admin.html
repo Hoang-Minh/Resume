@@ -1,0 +1,200 @@
+<article class="doc">
+  <a routerLink="/" fragment="work" class="back track track--display">All work</a>
+
+  <header class="masthead track track--display">
+    <p class="eyebrow">Case study — County of Orange</p>
+    <h1 class="masthead__title">Giving county staff the keys, safely</h1>
+    <p class="masthead__dek">The bottleneck wasn't technical. It was the org chart.</p>
+
+    <dl class="facts">
+      <div class="facts__row">
+        <dt class="facts__label">Role</dt>
+        <dd class="facts__value">Architect and sole developer</dd>
+      </div>
+      <div class="facts__row">
+        <dt class="facts__label">When</dt>
+        <dd class="facts__value">2025 — present</dd>
+      </div>
+      <div class="facts__row">
+        <dt class="facts__label">Stack</dt>
+        <dd class="facts__value">Angular · .NET Core · SQL Server · Entra ID</dd>
+      </div>
+      <div class="facts__row">
+        <dt class="facts__label">Access</dt>
+        <dd class="facts__value">Internal only — no public surface</dd>
+      </div>
+    </dl>
+  </header>
+
+  <div class="body track track--doc">
+    <mn-block>
+      <h2>The problem</h2>
+      <p>
+        Before this existed, the Treasurer-Tax Collector could not change their own
+        application.
+      </p>
+      <ul>
+        <li>
+          <strong>Open or close payments for a fiscal year</strong> — ask another county
+          department for a developer to edit the legacy ASP app.
+        </li>
+        <li><strong>Change power-to-sell status</strong> — same.</li>
+        <li>
+          <strong>Post a notice on the tax bill homepage</strong> — nothing. The capability
+          didn't exist.
+        </li>
+        <li><strong>Look up a payment</strong> — contact the payment vendor.</li>
+      </ul>
+      <p>
+        Every one of those is a routine operational act. Closing the payment window when a
+        fiscal year ends is a calendar event, not an engineering project. But each one
+        required either another department's developer or an outside company, which meant
+        every routine act carried a queue and a wait.
+      </p>
+
+      <div ref>
+        <p class="ref__figure">Power to sell</p>
+        <p>
+          Properties subject to a lender's power-of-sale clause, or in that status through
+          unpaid taxes. Consequential records about real people's homes.
+        </p>
+      </div>
+    </mn-block>
+
+    <mn-block>
+      <h2>It isn't an admin panel</h2>
+      <p>It's named Tax Bill Admin, which undersells it. It does four jobs:</p>
+      <ol class="steps">
+        <li>
+          <strong>System of record for payment transactions.</strong> When a taxpayer starts
+          a payment, the public application writes the taxpayer and bill details here. When
+          the processor's callback comes back, the response is stored here too.
+        </li>
+        <li>
+          <strong>Request signer.</strong> It signs the payment request before the taxpayer
+          is redirected to the processor's gateway.
+        </li>
+        <li>
+          <strong>Control plane.</strong> Payment on or off, power-to-sell status, public
+          announcements.
+        </li>
+        <li><strong>Staff console.</strong> The interface county staff actually use.</li>
+      </ol>
+      <p>
+        It didn't start that way. In phase one the county didn't own the payment flow — the
+        previous processor did, including callbacks and confirmation emails. Insourcing
+        payments when the county changed processors is what turned a settings screen into a
+        transaction store, a signer, and a reconciler. The architecture followed the
+        ownership.
+      </p>
+    </mn-block>
+
+    <mn-block>
+      <h2>Architecture</h2>
+      <p>
+        Same stack as the public application. <strong>Separate repository, separate
+        database, separate deployment pipeline</strong>, sharing a server. The separation is
+        deliberate: the public tax bill application and the internal service behind it
+        should not be able to break each other by accident.
+      </p>
+      <p><strong>The browser never reaches it.</strong></p>
+      <p>
+        The processor's callback follows the same path — validated at the public tier, then
+        forwarded inward, where the transaction is persisted and order-number uniqueness is
+        enforced on write. Both scheduled jobs, the gateway-timeout sweep and the
+        end-of-day reconciliation, run on the internal side, next to the data they
+        reconcile.
+      </p>
+      <p>
+        Which is why staff transaction lookup never touches the public application. It runs
+        entirely against records this service already holds.
+      </p>
+
+      <div ref>
+        <p class="ref__figure">Server to server</p>
+        <p>
+          The service holding payment records is reached only by the application in front of
+          it, never by a browser.
+        </p>
+      </div>
+    </mn-block>
+
+    <mn-block>
+      <h2>Who can press the buttons</h2>
+      <p>
+        Access is single sign-on through <strong>Azure Entra ID</strong>, limited to
+        authorized Treasurer-Tax Collector staff.
+      </p>
+      <p>
+        Permissions are <strong>separated by role</strong> — being able to sign in doesn't
+        mean being able to do everything. Publishing an announcement and disabling payments
+        are not the same capability and are not granted together.
+      </p>
+      <p>
+        <strong>Every action writes an audit trail.</strong> Who disabled payments, who
+        changed a power-to-sell status, when. For a government financial system that isn't a
+        nice-to-have — "who changed this" is a question that eventually gets asked formally.
+      </p>
+      <p>
+        Announcements and the payment toggle aren't cached, so a change takes effect on the
+        public site essentially immediately. That's the right tradeoff: these are the
+        controls you reach for when something is wrong, and a control you have to wait on is
+        not a control.
+      </p>
+    </mn-block>
+
+    <mn-block>
+      <h2>The tradeoff I'd revisit</h2>
+      <p>
+        This service does two quite different jobs. It is the transaction system of record,
+        which is payment-critical. It is also the console staff open to edit an
+        announcement, which is routine. One deployable, one pipeline, two very different
+        risk profiles — and the routine job is the one that generates most of the changes.
+        <strong>Splitting the transaction store from the console</strong> is the change I'd
+        make if the staff-facing surface keeps growing.
+      </p>
+      <p>
+        The principle I did settle on and would defend: <strong>fail closed.</strong> A
+        payment the county cannot account for is worse than a payment it cannot take. That
+        is an uncomfortable position to hold on a deadline day, and I'd still take it over
+        the alternative.
+      </p>
+
+      <div class="limit">
+        <span class="limit__label">What I'd add next</span>
+        <p>
+          <strong>Effective dates on the payment window.</strong> Almost everything staff do
+          here is calendar-driven — a fiscal year opens, a deadline passes — and each of
+          those currently depends on someone remembering to go and click at the right time.
+          A change you schedule in advance is safer than a change you have to remember, and
+          it's the highest-value thing missing.
+        </p>
+        <p>
+          I'd also revisit the guardrails as the authorized group grows. Reasoning that
+          suits a handful of trained users doesn't necessarily hold at twenty, and I'd
+          rather make that change before it's needed than after.
+        </p>
+      </div>
+
+      <div ref>
+        <p class="ref__figure">No incidents</p>
+        <p>Nothing has gone wrong to date.</p>
+      </div>
+    </mn-block>
+
+    <mn-block>
+      <h2>Where it stands</h2>
+      <p>
+        County staff now open and close payment windows, manage power-to-sell status,
+        publish announcements to the tax bill homepage, and look up any transaction
+        themselves — without a ticket to another department and without calling a vendor.
+      </p>
+      <p>The announcement capability didn't exist before in any form.</p>
+    </mn-block>
+
+    <p class="next">
+      <span class="next__label">Next</span>
+      <a routerLink="/work/partie">Partie — real-time video and notifications</a>
+    </p>
+  </div>
+</article>

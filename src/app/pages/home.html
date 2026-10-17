@@ -1,0 +1,174 @@
+<section class="masthead" aria-labelledby="claim">
+  <div class="track track--display">
+    <p class="eyebrow">{{ site.role }} — {{ site.location }}</p>
+
+    <h1 id="claim" class="masthead__claim">
+      I replaced a 20&#8209;year&#8209;old system that bills
+      <a [href]="pressRelease" class="figure">$9.7&nbsp;billion</a>.
+    </h1>
+
+    <p class="masthead__byline">
+      <span class="masthead__who">{{ site.name }}</span> · Angular and .NET
+    </p>
+  </div>
+
+  <div class="track track--doc masthead__body">
+    <mn-block>
+      <div class="prose">
+        <p>
+          At Orange County IT I replaced a 20-year-old classic ASP property tax system
+          with Angular 20 and .NET 9. It is now the system of record for 886,000 secured
+          property tax bills — and the only one: the legacy application is fully retired.
+        </p>
+        <p>
+          Before that, full stack on Partie, a consumer gaming platform, where I built the
+          real-time video and notification integrations.
+        </p>
+      </div>
+
+      <div ref>
+        <p class="ref__figure data">2024 — present</p>
+        <p>
+          County of Orange, Information Technology. Sole developer on the replacement
+          since it launched.
+        </p>
+      </div>
+    </mn-block>
+
+    <p class="masthead__actions">
+      <a href="#work" class="action action--lead">Case studies</a>
+      <a [href]="site.resumePath" class="action">Resume</a>
+      <a href="#contact" class="action">Get in touch</a>
+    </p>
+  </div>
+</section>
+
+<aside class="evidence" aria-labelledby="evidence-label">
+  <div class="track track--display">
+    <p class="eyebrow evidence__label" id="evidence-label">
+      Secured property tax · FY 2025-26
+    </p>
+
+    <hr class="evidence__rule" />
+
+    <dl class="evidence__figures">
+      <div class="evidence__cell">
+        <dt class="evidence__caption">Bills issued</dt>
+        <dd class="evidence__value data">886,000</dd>
+      </div>
+      <div class="evidence__cell">
+        <dt class="evidence__caption">Total billed</dt>
+        <dd class="evidence__value data">$9.7B</dd>
+      </div>
+    </dl>
+
+    <p class="evidence__note">
+      Issued by the system I built. Quoted from the County of Orange press release, which
+      names it directly. <a [href]="pressRelease" class="evidence__source">octreasurer.gov</a>
+    </p>
+  </div>
+</aside>
+
+<section id="work" class="section section--loud" aria-labelledby="work-heading">
+  <div class="track track--display">
+    <p class="eyebrow">Selected work</p>
+    <h2 id="work-heading" class="section__heading section__heading--loud">
+      Three systems, and what each one had to survive.
+    </h2>
+
+    <ul class="ledger">
+      @for (entry of work; track entry.slug) {
+        <li class="ledger__row" [class.ledger__row--quiet]="entry.weight === 'secondary'">
+          <a class="ledger__link" [routerLink]="['/work', entry.slug]">
+            <span class="ledger__index data" aria-hidden="true"></span>
+            <span class="ledger__body">
+              <h3 class="ledger__title">{{ entry.title }}</h3>
+              <span class="ledger__summary">{{ entry.summary }}</span>
+              <span class="ledger__stack">
+                @for (tech of entry.stack; track tech) {
+                  <span class="chip">{{ tech }}</span>
+                }
+              </span>
+            </span>
+            <span class="ledger__meta">
+              <span class="ledger__period data">{{ entry.period }}</span>
+              <span class="ledger__reference">{{ entry.reference }}</span>
+            </span>
+          </a>
+        </li>
+      }
+    </ul>
+  </div>
+</section>
+
+<section id="experience" class="section" aria-labelledby="experience-heading">
+  <div class="track track--doc">
+    <p class="eyebrow">Experience</p>
+    <h2 id="experience-heading" class="section__heading">Where the work happened.</h2>
+
+    @for (entry of timeline; track entry.employer) {
+      <mn-block ruled>
+        <h3 class="entry__employer">{{ entry.employer }}</h3>
+        <p class="entry__detail">{{ entry.detail }}</p>
+
+        <div ref>
+          <p class="ref__figure data">{{ entry.period }}</p>
+          @for (role of entry.roles; track role.period) {
+            <p class="entry__role">
+              {{ role.title }}<br />
+              <span class="entry__org">{{ role.org }}</span><br />
+              <span class="data">{{ role.period }}</span>
+            </p>
+          }
+        </div>
+      </mn-block>
+    }
+  </div>
+</section>
+
+<section id="skills" class="section section--quiet" aria-labelledby="skills-heading">
+  <div class="track track--doc">
+    <p class="eyebrow">Skills</p>
+    <h2 id="skills-heading" class="section__heading section__heading--quiet">
+      Sorted by how recently I've actually used them.
+    </h2>
+
+    @for (tier of skills; track tier.label) {
+      <mn-block ruled>
+        <ul class="tier__items">
+          @for (item of tier.items; track item) {
+            <li class="chip chip--lg">{{ item }}</li>
+          }
+        </ul>
+
+        <div ref>
+          <p class="ref__figure">{{ tier.label }}</p>
+          <p>{{ tier.note }}</p>
+        </div>
+      </mn-block>
+    }
+  </div>
+</section>
+
+<section id="earlier" class="section section--footnote section--last" aria-labelledby="earlier-heading">
+  <div class="track track--doc">
+    <mn-block ruled>
+      <h2 id="earlier-heading" class="earlier__heading">Earlier self-taught work</h2>
+      <ul class="earlier__list">
+        @for (project of sideProjects; track project.repo) {
+          <li>
+            <a [href]="project.repo">{{ project.name }}</a>
+            <span class="earlier__detail">{{ project.detail }}</span>
+          </li>
+        }
+      </ul>
+
+      <div ref>
+        <p>
+          Written between 2016 and 2020 while learning web development. Source only — the
+          hosted demos are long retired.
+        </p>
+      </div>
+    </mn-block>
+  </div>
+</section>

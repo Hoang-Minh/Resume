@@ -1,0 +1,318 @@
+<article class="doc">
+  <a routerLink="/" fragment="work" class="back track track--display">All work</a>
+
+  <header class="masthead track track--display">
+    <p class="eyebrow">Case study — County of Orange</p>
+    <h1 class="masthead__title">Replacing a 20-year-old property tax system</h1>
+    <p class="masthead__dek">
+      886,000 bills. $9.7 billion. A deadline set by statute.
+    </p>
+
+    <dl class="facts">
+      <div class="facts__row">
+        <dt class="facts__label">Role</dt>
+        <dd class="facts__value">Technical lead, then sole owner</dd>
+      </div>
+      <div class="facts__row">
+        <dt class="facts__label">When</dt>
+        <dd class="facts__value">Summer 2024 — present</dd>
+      </div>
+      <div class="facts__row">
+        <dt class="facts__label">Stack</dt>
+        <dd class="facts__value">Angular 20 · .NET 9 · SQL Server · Azure DevOps</dd>
+      </div>
+      <div class="facts__row">
+        <dt class="facts__label">Live</dt>
+        <dd class="facts__value">
+          <a href="https://taxbill.octreasurer.gov">taxbill.octreasurer.gov</a>
+        </dd>
+      </div>
+    </dl>
+  </header>
+
+  <div class="body track track--doc">
+    <mn-block>
+      <h2>The problem</h2>
+      <p>
+        Orange County collected property taxes through a classic ASP application written
+        around 2004. It worked, in the sense that money arrived. It also:
+      </p>
+      <ul>
+        <li>didn't function usefully on a phone</li>
+        <li>
+          let a taxpayer pay the same parcel bill twice — pay in November, forget, pay
+          again in December, and nothing stopped you
+        </li>
+        <li>gave taxpayers no way to view or print what they'd already paid</li>
+        <li>had little to no accessibility</li>
+        <li>
+          handed confirmation emails entirely to the payment vendor, so the county
+          controlled neither their content nor their delivery
+        </li>
+        <li>required a developer from a different county department to change anything</li>
+      </ul>
+      <p>
+        That last point matters more than it looks. The Treasurer-Tax Collector could not
+        modify their own application. Opening or closing the payment window for a fiscal
+        year meant asking another county department for a developer.
+      </p>
+
+      <div ref>
+        <p class="ref__figure data">886,000 bills · $9.7 billion</p>
+        <p>
+          FY 2025-26 secured property tax roll, from the county's own press release —
+          which names the system directly.
+        </p>
+        <p>
+          <a
+            href="https://octreasurer.gov/press/fy-2025-26-secured-property-tax-bills-available-online-and-mailed"
+            >octreasurer.gov</a
+          >
+        </p>
+      </div>
+    </mn-block>
+
+    <mn-block>
+      <h2>The constraints</h2>
+      <p>
+        <strong>The deadline was statutory.</strong> California property tax is delinquent
+        after December 10 and April 10. Those dates are set in law. A software project does
+        not move them, and missing one means taxpayers cannot pay a bill that is about to
+        accrue a penalty.
+      </p>
+      <p>
+        <strong>The business logic was undocumented and unowned.</strong> The tax
+        calculation lived in SQL scripts written by other county departments — routinely
+        over a hundred lines, encoding rules those departments set. The people who wrote
+        them were gone. Nobody remaining could explain how they worked.
+      </p>
+      <p>
+        <strong>The database rebuilds itself nightly.</strong> Another county department
+        reloads the tax bill database on its own schedule. That process was theirs, it
+        predated us, and it had to survive the rewrite untouched.
+      </p>
+      <p>
+        <strong>Two developers, six months.</strong> One working only on the frontend, and
+        me on everything else — frontend, backend, database, and the build and release
+        infrastructure. Summer 2024 to a December go-live.
+      </p>
+
+      <div ref>
+        <p class="ref__figure data">Dec 10 · Apr 10</p>
+        <p>
+          California's statutory delinquency dates. Both installments, every year,
+          non-negotiable.
+        </p>
+      </div>
+    </mn-block>
+
+    <mn-block>
+      <h2>What I decided</h2>
+      <p>I owned the architecture and the migration strategy.</p>
+      <p>
+        <strong>A .NET Core API with a separate .NET Core host serving the Angular
+        application.</strong> One public tier, one internal tier, a clear boundary between
+        them — which turned out to matter more than expected once payments came in-house.
+      </p>
+      <p>
+        <strong>Reuse the legacy database. Do not rewrite the legacy logic.</strong> This
+        was the most important call and the least impressive-sounding. Those hundred-line
+        SQL scripts encode property tax law for 886,000 bills. I could not verify a rewrite
+        was correct, because there was nobody left to verify it against. So I didn't
+        rewrite them — I moved them behind stored procedures. Identical behavior, but now
+        there's a seam. When a rule changes, there's one place to change it.
+      </p>
+
+      <p class="pull">
+        The instinct is to rewrite the ugly thing. The ugly thing was calculating people's
+        tax bills.
+      </p>
+    </mn-block>
+
+    <mn-block>
+      <h2>The frontend</h2>
+      <p>
+        Angular 16 at launch, since migrated to <strong>Angular 20, running
+        zoneless</strong>. Signals, standalone components, and the current control flow
+        syntax throughout.
+      </p>
+      <p>
+        Responsive, built from scratch — no component library. Reactive forms on the two
+        paths that matter, parcel lookup and payment, with validation on both the client
+        and the server, because the client's opinion about a payment is not authoritative.
+      </p>
+      <p>
+        No NgRx. This application looks up a bill and pays it. A state management library
+        would have been a second architecture to maintain in exchange for nothing.
+      </p>
+
+      <div ref>
+        <p class="ref__figure">Zoneless</p>
+        <p>
+          Few production Angular applications have made the move. This one runs without
+          zone.js in front of a public payment flow.
+        </p>
+      </div>
+    </mn-block>
+
+    <mn-block>
+      <h2>Paying exactly once</h2>
+      <p>
+        Under the previous payment processor, the county didn't control the payment flow at
+        all — no callbacks, no confirmation emails, no transaction records on our side. When
+        the county changed processors in December 2025, all of that became ours. So the
+        duplicate payment problem the legacy system had, we now had to actually solve.
+      </p>
+      <p>Four independent layers, each catching a different failure:</p>
+      <ol class="steps">
+        <li>
+          <strong>Before submitting</strong> — check both our own records and the
+          processor's, via their API, that no payment already exists for this parcel bill.
+        </li>
+        <li>
+          <strong>At the callback</strong> — every transaction carries an order number we
+          generate and send with the request. The callback lands on the public API for validation,
+          then goes to the internal service, which enforces order-number uniqueness on
+          write. That's a unique constraint on the column, not a check-then-insert in
+          application code, so a duplicate callback can't win a race — it fails the insert.
+          On a normal day you'd never see the difference. On a 10,000-transaction deadline
+          day, you might.
+        </li>
+        <li>
+          <strong>On a schedule</strong> — a job queries the processor for payments where
+          the gateway timed out after the taxpayer had already paid, so nobody gets charged
+          twice for one bill.
+        </li>
+        <li>
+          <strong>At end of day</strong> — pull every successful transaction from the
+          processor and confirm each one exists in county records.
+        </li>
+      </ol>
+      <p>
+        Layers one through three prevent problems. Layer four assumes the first three
+        failed and catches what got through. It's the one that earned its keep.
+      </p>
+
+      <div ref>
+        <p class="ref__figure data">100–300 / day</p>
+        <p>Normal payment volume.</p>
+        <p class="ref__figure data">~10,000 / day</p>
+        <p>Deadline days. Roughly 50 times baseline, on a date fixed by law.</p>
+      </div>
+    </mn-block>
+
+    <mn-block>
+      <h2>Cutting over, twice</h2>
+      <p>
+        Both cutovers were scheduled in the same narrow window:
+        <strong>late December, after the December 10 delinquent date</strong>, when traffic
+        is at its lowest. Twice, the riskiest action was taken in the calendar's quietest
+        moment. That was deliberate.
+      </p>
+      <h3>Legacy to new, December 2024</h3>
+      <p>
+        A hard flip, executed inside an existing nightly maintenance window, so the cutover
+        cost no availability of its own. We tested against a QA environment mirroring
+        production, logged payment details before and after they left our servers, and
+        accepted callbacks only from authenticated, authorized sources. The legacy
+        application stayed up on a separate domain as a rollback path. We never needed it.
+      </p>
+      <p>That one went cleanly.</p>
+      <h3>Changing payment processors, December 2025</h3>
+      <p>That one didn't.</p>
+
+      <div ref>
+        <p class="ref__figure">Nightly window</p>
+        <p>
+          The tax bill database is rebuilt nightly by another county department — existing
+          maintenance time the cutover could be scheduled inside rather than adding its own.
+        </p>
+      </div>
+    </mn-block>
+
+    <mn-block>
+      <h2>What went wrong</h2>
+      <p>
+        The new processor's callback format was inconsistent and undocumented. Most
+        callbacks were fine. Some arrived missing fields — payer email, first and last name.
+        Our server threw on the malformed ones and refused to process them, which meant the
+        payment was captured at the gateway, the transaction never reached county records,
+        and <strong>the taxpayer got no confirmation email.</strong>
+      </p>
+      <p>I found it by watching logs for the exceptions in the days after deployment.</p>
+      <p>
+        The fix came from a decision made months earlier for an unrelated reason. Because we
+        generate our own order number, send it with every request, and log the taxpayer and
+        parcel details against it <em>before</em> the request leaves our system, we already
+        held everything the response was missing. I patched the callback handler to backfill
+        from our own records, cross-check against whatever the callback did send, and
+        reconcile the missing transactions by order number. Then we pushed the processor to
+        fix the format.
+      </p>
+
+      <p class="pull">
+        The order number was designed as an idempotency key. It turned out to be a recovery
+        key. One identifier, two jobs — and the second one was the one that mattered.
+      </p>
+
+      <p>Nobody lost money. Some people didn't get their receipt, and that was on us.</p>
+    </mn-block>
+
+    <mn-block>
+      <h2>Where it stands</h2>
+      <ul>
+        <li>
+          <strong>The legacy system is fully retired.</strong> Not running alongside. Not
+          serving a few remaining routes. Off. Most migrations of twenty-year-old systems
+          never finish; this one did, in about six months, with two developers, against a
+          deadline nobody controls.
+        </li>
+        <li>
+          <strong>Four statutory deadline surges, no downtime.</strong> December 2024, April
+          2025, December 2025, April 2026 — handled with k6 load testing and response
+          caching on the lookup endpoints.
+        </li>
+        <li>
+          Taxpayers can use it on a phone, view and print payment history, submit feedback,
+          and pay by eCheck with no service fee.
+        </li>
+        <li>Duplicate payments are prevented by design rather than by luck.</li>
+        <li>Confirmation emails are ours now — content and delivery both.</li>
+        <li>Support comes from the county instead of a vendor queue.</li>
+      </ul>
+      <p>
+        I've been the sole developer on it since phase one ended: support, maintenance, and
+        every new feature.
+      </p>
+
+      <div ref>
+        <p class="ref__figure data">4 / 4</p>
+        <p>
+          Deadline cycles survived without downtime, from launch through April 2026.
+        </p>
+      </div>
+    </mn-block>
+
+    <mn-block>
+      <h2>What I'd tell you in an interview</h2>
+      <div class="limit">
+        <span class="limit__label">Stated plainly</span>
+        <p>
+          Accessibility followed county standards. There was no formal audit and no VPAT,
+          and I'm not going to claim one.
+        </p>
+      </div>
+      <p>
+        It's a plain SPA with no server-side rendering. For a public site the obvious
+        question is why. The answer is that nothing here is content anyone finds through
+        search — every page that matters sits behind a parcel lookup. If the feedback and
+        announcement surfaces grow into anything content-shaped, that calculation changes.
+      </p>
+    </mn-block>
+
+    <p class="next">
+      <span class="next__label">Next</span>
+      <a routerLink="/work/tax-bill-admin">Tax Bill Admin — the internal service behind it</a>
+    </p>
+  </div>
+</article>
